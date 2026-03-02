@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "riskeval-repro"
+version = "0.1.0"
+description = "Reproduction of the RiskEval framework from arXiv:2601.07767"
+requires-python = ">=3.10"
+dependencies = [
+  "openai>=1.30.0",
+  "datasets>=2.20.0",
+  "huggingface_hub>=0.23.0"
+]
+
+[project.scripts]
+riskeval = "riskeval.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,55 @@
+# macOS
+.DS_Store
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test / type / lint caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments / local Python managers
+.venv/
+venv/
+env/
+.conda/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local environment files
+.env
+.env.*
+
+# Runtime logs and temp
+*.log
+*.tmp
+*.swp
+
+# Project outputs (generated experiment artifacts)
+output/
+
+# Large/local datasets: keep one small sample for reproducibility docs
+data/*
+!data/sample_mcq.jsonl
+
+# Local plotting/config cache
+.matplotlib/
