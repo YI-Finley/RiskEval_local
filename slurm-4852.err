@@ -1,37 +1,0 @@
-`torch_dtype` is deprecated! Use `dtype` instead!
-Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   0%|          | 1/398 [00:00<01:12,  5.51it/s]Loading weights:  15%|#5        | 60/398 [00:00<00:01, 262.18it/s]Loading weights:  24%|##3       | 95/398 [00:00<00:01, 289.21it/s]Loading weights:  32%|###2      | 129/398 [00:00<00:00, 284.12it/s]Loading weights:  40%|####      | 161/398 [00:00<00:00, 273.20it/s]Loading weights:  48%|####7     | 191/398 [00:00<00:00, 262.08it/s]Loading weights:  55%|#####5    | 219/398 [00:00<00:00, 264.50it/s]Loading weights:  63%|######3   | 251/398 [00:00<00:00, 274.32it/s]Loading weights:  70%|#######   | 280/398 [00:01<00:00, 263.32it/s]Loading weights:  78%|#######8  | 311/398 [00:01<00:00, 264.83it/s]Loading weights:  85%|########5 | 339/398 [00:01<00:00, 258.89it/s]Loading weights:  93%|#########2| 370/398 [00:01<00:00, 272.49it/s]Loading weights: 100%|##########| 398/398 [00:01<00:00, 263.83it/s]
-Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   0%|          | 1/398 [00:00<01:34,  4.21it/s]Loading weights:  17%|#6        | 66/398 [00:00<00:01, 242.66it/s]Loading weights:  26%|##5       | 103/398 [00:00<00:01, 234.73it/s]Loading weights:  34%|###3      | 134/398 [00:00<00:01, 226.87it/s]Loading weights:  40%|####      | 161/398 [00:00<00:01, 236.88it/s]Loading weights:  47%|####7     | 188/398 [00:00<00:00, 244.17it/s]Loading weights:  54%|#####4    | 215/398 [00:00<00:00, 242.73it/s]Loading weights:  61%|######    | 242/398 [00:01<00:00, 243.75it/s]Loading weights:  68%|######7   | 269/398 [00:01<00:00, 238.96it/s]Loading weights:  76%|#######5  | 301/398 [00:01<00:00, 260.88it/s]Loading weights:  82%|########2 | 328/398 [00:01<00:00, 259.12it/s]Loading weights:  89%|########9 | 356/398 [00:01<00:00, 263.71it/s]Loading weights:  96%|#########6| 383/398 [00:01<00:00, 255.90it/s]Loading weights: 100%|##########| 398/398 [00:01<00:00, 242.70it/s]
-`rope_parameters`'s factor field must be a float >= 1, got 40
-`rope_parameters`'s beta_fast field must be a float, got 32
-`rope_parameters`'s beta_slow field must be a float, got 1
-`rope_parameters`'s factor field must be a float >= 1, got 40
-`rope_parameters`'s beta_fast field must be a float, got 32
-`rope_parameters`'s beta_slow field must be a float, got 1
-Traceback (most recent call last):
-  File "<frozen runpy>", line 198, in _run_module_as_main
-  File "<frozen runpy>", line 88, in _run_code
-  File "/home/comp/23481501/RiskEval/src/riskeval/cli.py", line 24, in <module>
-    main()
-  File "/home/comp/23481501/RiskEval/src/riskeval/cli.py", line 19, in main
-    out = run(cfg)
-          ^^^^^^^^
-  File "/home/comp/23481501/RiskEval/src/riskeval/runner.py", line 452, in run
-    judge_raw = judge_client.complete(
-                ^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/comp/23481501/RiskEval/src/riskeval/client.py", line 233, in complete
-    bundle = self._get_bundle(model_name)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/comp/23481501/RiskEval/src/riskeval/client.py", line 294, in _get_bundle
-    model = self._AutoModelForCausalLM.from_pretrained(
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/comp/23481501/py312env/lib/python3.12/site-packages/transformers/models/auto/auto_factory.py", line 374, in from_pretrained
-    return model_class.from_pretrained(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/comp/23481501/py312env/lib/python3.12/site-packages/transformers/modeling_utils.py", line 4037, in from_pretrained
-    hf_quantizer, config, device_map = get_hf_quantizer(
-                                       ^^^^^^^^^^^^^^^^^
-  File "/home/comp/23481501/py312env/lib/python3.12/site-packages/transformers/quantizers/auto.py", line 339, in get_hf_quantizer
-    hf_quantizer.validate_environment(
-  File "/home/comp/23481501/py312env/lib/python3.12/site-packages/transformers/quantizers/quantizer_finegrained_fp8.py", line 30, in validate_environment
-    raise ImportError("Loading an FP8 quantized model requires accelerate (`pip install accelerate`)")
-ImportError: Loading an FP8 quantized model requires accelerate (`pip install accelerate`)

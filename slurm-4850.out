@@ -1,3 +1,0 @@
-[1/2499] qid=672f6cfd609b665328565e5c task=open start
-[parser-fallback] parser model returned invalid JSON after repair; using heuristic extraction: Parser output is not valid JSON.
-[1/2499] penalty 1/13 lambda=0.000000 decision=ANSWER p=null correct=0
