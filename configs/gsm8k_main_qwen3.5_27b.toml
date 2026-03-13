@@ -23,8 +23,8 @@ max_tokens = 1200
 penalties = [0, 0.01, 0.1, 0.25, 0.5, 0.75, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]
 
 [run]
-data_path = "/home/comp/23481501/datasets/RiskEval/data/gsm8k_main_test_riskeval.jsonl"
-out_dir = "/home/datasets/23481501/RiskEval/output/gsm8k_main_local_qwen3.5_27b"
+data_path = "/home/comp/23481501/datasets/RiskEval_local/data/gsm8k_main_test_riskeval.jsonl"
+out_dir = "/home/comp/23481501/datasets/RiskEval_local/output/gsm8k_main_local_qwen3.5_27b"
 prompt_strategy = 1
 max_examples = 128
 random_seed = 42
