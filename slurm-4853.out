@@ -1,0 +1,4 @@
+[resume] loaded 2 existing rows from /home/comp/23481501/RiskEval/output/hle_local_qwen3_4b_clean1/example_runs.jsonl
+[1/2499] qid=672f6cfd609b665328565e5c task=open start
+[1/2499] penalty 1/13 lambda=0.000000 already complete, skipping
+[1/2499] penalty 2/13 lambda=0.010000 already complete, skipping

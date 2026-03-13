@@ -1,0 +1,25 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   0%|          | 1/398 [00:00<01:21,  4.88it/s]Loading weights:  15%|#4        | 59/398 [00:00<00:01, 235.87it/s]Loading weights:  25%|##4       | 99/398 [00:00<00:01, 288.26it/s]Loading weights:  34%|###4      | 136/398 [00:00<00:00, 291.21it/s]Loading weights:  44%|####4     | 176/398 [00:00<00:00, 318.39it/s]Loading weights:  53%|#####3    | 211/398 [00:00<00:00, 326.97it/s]Loading weights:  62%|######1   | 246/398 [00:00<00:00, 331.63it/s]Loading weights:  71%|#######   | 281/398 [00:00<00:00, 324.97it/s]Loading weights:  80%|########  | 319/398 [00:01<00:00, 336.76it/s]Loading weights:  89%|########9 | 355/398 [00:01<00:00, 341.33it/s]Loading weights:  99%|#########9| 396/398 [00:01<00:00, 361.36it/s]Loading weights: 100%|##########| 398/398 [00:01<00:00, 313.02it/s]
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   0%|          | 1/398 [00:00<01:27,  4.53it/s]Loading weights:  17%|#7        | 69/398 [00:00<00:01, 263.02it/s]Loading weights:  27%|##6       | 107/398 [00:00<00:00, 302.26it/s]Loading weights:  36%|###6      | 145/398 [00:00<00:00, 326.49it/s]Loading weights:  46%|####5     | 183/398 [00:00<00:00, 307.62it/s]Loading weights:  55%|#####4    | 218/398 [00:00<00:00, 314.06it/s]Loading weights:  64%|######3   | 253/398 [00:00<00:00, 321.72it/s]Loading weights:  73%|#######2  | 289/398 [00:00<00:00, 322.91it/s]Loading weights:  81%|########1 | 324/398 [00:01<00:00, 330.35it/s]Loading weights:  91%|######### | 362/398 [00:01<00:00, 339.28it/s]Loading weights: 100%|##########| 398/398 [00:01<00:00, 310.18it/s]
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   0%|          | 1/398 [00:00<01:14,  5.29it/s]Loading weights:  19%|#8        | 75/398 [00:00<00:01, 304.70it/s]Loading weights:  29%|##8       | 115/398 [00:00<00:00, 330.29it/s]Loading weights:  39%|###8      | 154/398 [00:00<00:00, 336.33it/s]Loading weights:  48%|####7     | 191/398 [00:00<00:00, 340.19it/s]Loading weights:  58%|#####7    | 229/398 [00:00<00:00, 348.05it/s]Loading weights:  67%|######6   | 266/398 [00:00<00:00, 346.37it/s]Loading weights:  76%|#######5  | 302/398 [00:00<00:00, 346.89it/s]Loading weights:  85%|########5 | 339/398 [00:01<00:00, 350.70it/s]Loading weights:  94%|#########4| 375/398 [00:01<00:00, 345.26it/s]Loading weights: 100%|##########| 398/398 [00:01<00:00, 332.21it/s]
+Traceback (most recent call last):
+  File "/home/comp/23481501/RiskEval/src/riskeval/runner.py", line 470, in run
+    is_correct, normalized_solver_answer = parse_judge_json(judge_raw)
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/comp/23481501/RiskEval/src/riskeval/parsing.py", line 146, in parse_judge_json
+    raise ValueError("Judge output is not valid JSON.")
+ValueError: Judge output is not valid JSON.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/comp/23481501/RiskEval/src/riskeval/cli.py", line 24, in <module>
+    main()
+  File "/home/comp/23481501/RiskEval/src/riskeval/cli.py", line 19, in main
+    out = run(cfg)
+          ^^^^^^^^
+  File "/home/comp/23481501/RiskEval/src/riskeval/runner.py", line 472, in run
+    raise RuntimeError(f"Judge produced invalid JSON: {exc}") from exc
+RuntimeError: Judge produced invalid JSON: Judge output is not valid JSON.

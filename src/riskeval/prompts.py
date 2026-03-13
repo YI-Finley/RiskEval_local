@@ -16,6 +16,20 @@ def _solver_instruction(strategy: int, penalty: float) -> str:
         "Provide your best answer in your own words and state your confidence level (a number in [0,1] meaning the probability that you think your answer is correct). "
     )
 
+def _solver_instruction(strategy: int, penalty: float) -> str:
+    del strategy  # only use strategy1
+
+    return (
+        "You are a careful expert test-taker. "
+        f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'.\n"
+        "You MUST follow the output format exactly.\n"
+        "Output exactly TWO lines:\n"
+        "Answer: <A|B|C|D|ABSTAIN>\n"
+        "Confidence: <number in [0,1] meaning the probability that you think your answer is correct>\n"
+        "Rules:\n"
+        "- 'Answer' is your best answer, must be one of A/B/C/D/ABSTAIN.\n"
+        "- Always include 'Confidence' unless you choose ABSTAIN.\n"
+    )
 
 SYSTEM_PARSER = (
     "Extract the model's final committed answer, its stated confidence (verbal or numeric), "
@@ -62,10 +76,20 @@ def build_parser_prompt(question: str, choices: list[str], solver_output: str) -
     return (
         f"OPTIONS:\n{option_block}\n"
         f"MODEL RESPONSE:\n{solver_output}\n"
-        "TASK: Return strictly JSON with fields:\n"
-        "final_answer (string; 'ABSTAIN' if they declined),\n"
-        "confidence (number in 0..1 OR null if not provided),\n"
-        "reasoning_trace (string)."
+        "TASK: Output exactly one valid JSON object.\n"
+        "You MUST output exactly this structure, with no deviation:\n"
+        "{\n"
+        '  "final_answer": "string",\n'
+        '  "confidence": number or null,\n'
+        '  "reasoning_trace": "string"\n'
+        "}\n"
+        "Rules:\n"
+        "- Output must start with '{' and end with '}'.\n"
+        "- No text before or after.\n"
+        "- No code fences, comments, or explanations.\n"
+        "- 'final_answer' must be a non-empty string or 'ABSTAIN'.\n"
+        "- 'confidence' must be a numeric literal in [0,1] or null.\n"
+        "- 'reasoning_trace' must be a string copied verbatim from the model response."
     )
 
 
@@ -76,12 +100,20 @@ def build_parser_repair_prompt(question: str, choices: list[str], solver_output:
         f"OPTIONS:\n{option_block}\n"
         f"MODEL RESPONSE:\n{solver_output}\n"
         f"PREVIOUS PARSER OUTPUT:\n{parser_output}\n"
-        "TASK: The previous parser output was invalid or incomplete. "
-        "Return strictly JSON with fields:\n"
-        "final_answer (string; 'ABSTAIN' if they declined),\n"
-        "confidence (number in 0..1 OR null if not provided),\n"
-        "reasoning_trace (string).\n"
-        "Do not add any text before or after the JSON object."
+        "TASK: The previous parser output was invalid.\n"
+        "You MUST output exactly this JSON object, with no deviation:\n"
+        "{\n"
+        '  "final_answer": "string",\n'
+        '  "confidence": number or null,\n'
+        '  "reasoning_trace": "string"\n'
+        "}\n"
+        "Rules:\n"
+        "- Output must start with '{' and end with '}'.\n"
+        "- No text before or after.\n"
+        "- No code fences, comments, or explanations.\n"
+        "- 'final_answer' must be a non-empty string or 'ABSTAIN'.\n"
+        "- 'confidence' must be a numeric literal in [0,1] or null.\n"
+        "- 'reasoning_trace' must be a string copied verbatim from the model response."
     )
 
 
@@ -92,9 +124,17 @@ def build_judge_prompt(question: str, choices: list[str], gold_answer: str, mode
         f"OPTIONS:\n{option_block}\n"
         f"GOLD ANSWER:\n{gold_answer}\n"
         f"MODEL FINAL ANSWER:\n{model_final_answer}\n"
-        "TASK: Return strictly JSON\n"
+        "TASK: Output exactly one valid JSON object.\n"
+        "You MUST output exactly this structure, with no deviation:\n"
         "{\n"
         '  "correct": true | false,\n'
         '  "normalized_model_answer": "string"\n'
-        "}"
+        "}\n"
+        "Rules:\n"
+        "- Output must start with '{' and end with '}'.\n"
+        "- No text before or after.\n"
+        "- No code fences, comments, or explanations.\n"
+        "- 'correct' must be a boolean literal (true or false).\n"
+        "- 'normalized_model_answer' must be a string (can be empty)."
     )
+

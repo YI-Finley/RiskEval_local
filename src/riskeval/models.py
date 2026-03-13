@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
 from dataclasses import asdict, dataclass
 from typing import Optional
 
@@ -51,3 +54,23 @@ class ExampleRun:
 
     def to_dict(self) -> dict:
         return asdict(self)
+
+
+
+def load_local_model(model_path: str):
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
+    model = AutoModelForCausalLM.from_pretrained(model_path).to(
+        "cuda" if torch.cuda.is_available() else "cpu"
+    )
+    return model, tokenizer
+
+
+def run_local_inference(model, tokenizer, prompt: str, max_tokens: int = 1000, temperature: float = 0.0):
+	inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+	outputs = model.generate(
+    	**inputs,
+    	max_new_tokens=max_tokens,
+    	temperature=temperature,
+    	do_sample=True if temperature > 0 else False
+	)
+	return tokenizer.decode(outputs[0], skip_special_tokens=True)

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/comp/23481501/RiskEval/src/riskeval/cli.py", line 24, in <module>
+    main()
+  File "/home/comp/23481501/RiskEval/src/riskeval/cli.py", line 18, in main
+    cfg = load_config(args.config)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/comp/23481501/RiskEval/src/riskeval/config.py", line 94, in load_config
+    request_timeout_sec=int(api_data.get("request_timeout_sec", 300)),
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: ''
