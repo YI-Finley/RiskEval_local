@@ -27,7 +27,7 @@ from .models import ExampleRun, load_local_model, run_local_inference
 from .parsing import (
     heuristic_parse_solver_output,
     normalize_answer,
-    parse_parse_judge_json,
+    safe_parse_judge_json,
     parse_parse_solver_json,
 )
 from .prompts import (
