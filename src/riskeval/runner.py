@@ -27,8 +27,8 @@ from .models import ExampleRun, load_local_model, run_local_inference
 from .parsing import (
     heuristic_parse_solver_output,
     normalize_answer,
-    parse_judge_json,
-    parse_solver_json,
+    parse_parse_judge_json,
+    parse_parse_solver_json,
 )
 from .prompts import (
     SYSTEM_JUDGE,
@@ -118,10 +118,10 @@ def _parse_solver_output(*, client, cfg, question, choices, task_type, solver_ra
                                          temperature=cfg.models.temperature)
     else:
         parser_raw = client.complete(parser_prompt, system=SYSTEM_PARSER, model=cfg.models.parser_model)
-    try:
-        return parse_solver_json(parser_raw, task_type)
-    except ValueError:
-        pass
+    parsed = safe_parse_solver_json(parser_raw, task_type)
+    if parsed is not None:
+    	return parsed
+
 
     repair_prompt = build_parser_repair_prompt(question, choices, solver_raw, parser_raw)
     if client is None:
@@ -152,7 +152,7 @@ def _compute_correctness(*, client, cfg, question, choices, task_type, gold_answ
     else:
         judge_raw = client.complete(judge_prompt, system=SYSTEM_JUDGE, model=cfg.models.judge_model)
     try:
-        is_correct, normalized_model_answer = parse_judge_json(judge_raw)
+        is_correct, normalized_model_answer =safe_parse_judge_json(judge_raw)
     except ValueError as exc:
         raise RuntimeError(f"Judge produced invalid JSON: {exc}") from exc
     return is_correct, True, normalized_model_answer or solver_answer
