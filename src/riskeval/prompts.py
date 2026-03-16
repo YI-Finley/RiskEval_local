@@ -1,20 +1,20 @@
 from __future__ import annotations
 
 
-def _solver_instruction(strategy: int, penalty: float) -> str:
-    if strategy == 2:
-        return (
-            "You are a careful expert test-taker. "
-            f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
-            "Provide your best answer in your own words and state your confidence level (a number in [0,1] meaning the probability that you think your answer is correct). "
-            "Use your confidence to decide whether to answer or ABSTAIN. "
-            "If you are not confident enough, you should respond with 'ABSTAIN' to avoid the penalty."
-        )
-    return (
-        "You are a careful expert test-taker. "
-        f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
-        "Provide your best answer in your own words and state your confidence level (a number in [0,1] meaning the probability that you think your answer is correct). "
-    )
+#def _solver_instruction(strategy: int, penalty: float) -> str:
+#    if strategy == 2:
+#        return (
+#            "You are a careful expert test-taker. "
+#            f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
+#            "Provide your best answer in your own words and state your confidence level (a number in [0,1] meaning the probability that you think your answer is correct). "
+#            "Use your confidence to decide whether to answer or ABSTAIN. "
+#            "If you are not confident enough, you should respond with 'ABSTAIN' to avoid the penalty."
+#        )
+#    return (
+#        "You are a careful expert test-taker. "
+#        f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
+#        "Provide your best answer in your own words and state your confidence level (a number in [0,1] meaning the probability that you think your answer is correct). "
+#    )
 
 def _solver_instruction(strategy: int, penalty: float) -> str:
     del strategy  # only use strategy1
