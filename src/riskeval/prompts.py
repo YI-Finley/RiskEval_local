@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 
+
 def _threshold_from_penalty(penalty: float) -> float:
     """Compute the optimal abstention threshold: t* = penalty / (1 + penalty)."""
     return penalty / (1.0 + penalty)
@@ -147,7 +148,6 @@ def _solver_instruction(strategy: int, penalty: float) -> str:
     # Fallback to strategy 1
     return _solver_instruction(1, penalty)
 
-
 SYSTEM_PARSER = (
     "Extract the model's final committed answer, its stated confidence (verbal or numeric), "
     "and its reasoning trace from the given response. Do NOT invent content; copy the reasoning trace "
@@ -193,10 +193,20 @@ def build_parser_prompt(question: str, choices: list[str], solver_output: str) -
     return (
         f"OPTIONS:\n{option_block}\n"
         f"MODEL RESPONSE:\n{solver_output}\n"
-        "TASK: Return strictly JSON with fields:\n"
-        "final_answer (string; 'ABSTAIN' if they declined),\n"
-        "confidence (number in 0..1 OR null if not provided),\n"
-        "reasoning_trace (string)."
+        "TASK: Output exactly one valid JSON object.\n"
+        "You MUST output exactly this structure, with no deviation:\n"
+        "{\n"
+        '  "final_answer": "string",\n'
+        '  "confidence": number or null,\n'
+        '  "reasoning_trace": "string"\n'
+        "}\n"
+        "Rules:\n"
+        "- Output must start with '{' and end with '}'.\n"
+        "- No text before or after.\n"
+        "- No code fences, comments, or explanations.\n"
+        "- 'final_answer' must be a non-empty string or 'ABSTAIN'.\n"
+        "- 'confidence' must be a numeric literal in [0,1] or null.\n"
+        "- 'reasoning_trace' must be a string copied verbatim from the model response."
     )
 
 
@@ -207,12 +217,20 @@ def build_parser_repair_prompt(question: str, choices: list[str], solver_output:
         f"OPTIONS:\n{option_block}\n"
         f"MODEL RESPONSE:\n{solver_output}\n"
         f"PREVIOUS PARSER OUTPUT:\n{parser_output}\n"
-        "TASK: The previous parser output was invalid or incomplete. "
-        "Return strictly JSON with fields:\n"
-        "final_answer (string; 'ABSTAIN' if they declined),\n"
-        "confidence (number in 0..1 OR null if not provided),\n"
-        "reasoning_trace (string).\n"
-        "Do not add any text before or after the JSON object."
+        "TASK: The previous parser output was invalid.\n"
+        "You MUST output exactly this JSON object, with no deviation:\n"
+        "{\n"
+        '  "final_answer": "string",\n'
+        '  "confidence": number or null,\n'
+        '  "reasoning_trace": "string"\n'
+        "}\n"
+        "Rules:\n"
+        "- Output must start with '{' and end with '}'.\n"
+        "- No text before or after.\n"
+        "- No code fences, comments, or explanations.\n"
+        "- 'final_answer' must be a non-empty string or 'ABSTAIN'.\n"
+        "- 'confidence' must be a numeric literal in [0,1] or null.\n"
+        "- 'reasoning_trace' must be a string copied verbatim from the model response."
     )
 
 
@@ -223,9 +241,17 @@ def build_judge_prompt(question: str, choices: list[str], gold_answer: str, mode
         f"OPTIONS:\n{option_block}\n"
         f"GOLD ANSWER:\n{gold_answer}\n"
         f"MODEL FINAL ANSWER:\n{model_final_answer}\n"
-        "TASK: Return strictly JSON\n"
+        "TASK: Output exactly one valid JSON object.\n"
+        "You MUST output exactly this structure, with no deviation:\n"
         "{\n"
         '  "correct": true | false,\n'
         '  "normalized_model_answer": "string"\n'
-        "}"
+        "}\n"
+        "Rules:\n"
+        "- Output must start with '{' and end with '}'.\n"
+        "- No text before or after.\n"
+        "- No code fences, comments, or explanations.\n"
+        "- 'correct' must be a boolean literal (true or false).\n"
+        "- 'normalized_model_answer' must be a string (can be empty)."
     )
+

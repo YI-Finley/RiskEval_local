@@ -169,3 +169,25 @@ def normalize_answer(answer: str, task_type: str) -> str:
             return labeled_match.group(1).upper()
         return " ".join(text.casefold().split())
     return " ".join(text.casefold().split())
+
+def safe_parse_solver_json(raw: str, task_type: str) -> ParsedSolverOutput:
+    try:
+        return parse_solver_json(raw, task_type)
+    except Exception as e:
+        # return an default object
+        return ParsedSolverOutput(
+            decision="ABSTAIN",
+            final_answer="ABSTAIN",
+            confidence_text="unknown",
+            confidence_prob=None,
+            reasoning_trace=f"Parser failed: {e}\nRaw output: {raw}"
+        )
+
+
+def safe_parse_judge_json(raw: str) -> tuple[bool, str]:
+    try:
+        return parse_judge_json(raw)
+    except Exception as e:
+        # return "wrong" answer , avoid interrupt
+        return False, f"Judge parser failed: {e}\nRaw output: {raw}"
+

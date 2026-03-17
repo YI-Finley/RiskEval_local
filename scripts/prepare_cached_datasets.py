@@ -8,8 +8,8 @@ from pathlib import Path
 import pyarrow.ipc as ipc
 
 
-HF_CACHE = Path("/Users/wuyuchen/.cache/huggingface/datasets")
-DATA_DIR = Path("/Users/wuyuchen/Desktop/RiskEval/data")
+HF_CACHE = Path("/home/comp/23481501/datasets")
+DATA_DIR = Path("/home/comp/23481501/RiskEval/data")
 
 
 def _read_arrow_rows(path: Path) -> list[dict]:

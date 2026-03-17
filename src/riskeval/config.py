@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import os
-import tomllib
+try:
+    import tomllib  # Python 3.11+
+except ModuleNotFoundError:
+    import tomli as tomllib  # Python 3.8  uses another package
 from dataclasses import dataclass
 from pathlib import Path
 

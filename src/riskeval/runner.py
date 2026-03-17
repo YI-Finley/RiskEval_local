@@ -23,12 +23,12 @@ from .metrics import (
     threshold_from_penalty,
     utility_from_action,
 )
-from .models import ExampleRun
+from .models import ExampleRun, load_local_model, run_local_inference
 from .parsing import (
     heuristic_parse_solver_output,
     normalize_answer,
-    parse_judge_json,
-    parse_solver_json,
+    safe_parse_judge_json,
+    safe_parse_solver_json,
 )
 from .prompts import (
     SYSTEM_JUDGE,
@@ -110,52 +110,34 @@ def _enforce_dataset_protocol(cfg: Config, total_rows: int) -> None:
         raise ValueError("HLE/GSM8K runs must use run.max_examples = 128.")
 
 
-def _parse_solver_output(
-    *,
-    client: LLMClient,
-    cfg: Config,
-    question: str,
-    choices: list[str],
-    task_type: str,
-    solver_raw: str,
-):
+def _parse_solver_output(*, client, cfg, question, choices, task_type, solver_raw):
     parser_prompt = build_parser_prompt(question, choices, solver_raw)
-    parser_raw = client.complete(
-        parser_prompt,
-        system=SYSTEM_PARSER,
-        model=cfg.models.parser_model,
-    )
-    try:
-        return parse_solver_json(parser_raw, task_type)
-    except ValueError:
-        pass
+    if client is None:
+        parser_raw = run_local_inference(model, tokenizer, parser_prompt,
+                                         max_tokens=cfg.models.max_tokens,
+                                         temperature=cfg.models.temperature)
+    else:
+        parser_raw = client.complete(parser_prompt, system=SYSTEM_PARSER, model=cfg.models.parser_model)
+    parsed = safe_parse_solver_json(parser_raw, task_type)
+    if parsed is not None:
+    	return parsed
+
 
     repair_prompt = build_parser_repair_prompt(question, choices, solver_raw, parser_raw)
-    repair_raw = client.complete(
-        repair_prompt,
-        system=SYSTEM_PARSER_REPAIR,
-        model=cfg.models.parser_model,
-    )
+    if client is None:
+        repair_raw = run_local_inference(model, tokenizer, repair_prompt,
+                                         max_tokens=cfg.models.max_tokens,
+                                         temperature=cfg.models.temperature)
+    else:
+        repair_raw = client.complete(repair_prompt, system=SYSTEM_PARSER_REPAIR, model=cfg.models.parser_model)
     try:
         return parse_solver_json(repair_raw, task_type)
     except ValueError as exc:
-        print(
-            f"[parser-fallback] parser model returned invalid JSON after repair; using heuristic extraction: {exc}",
-            flush=True,
-        )
+        print(f"[parser-fallback] parser model returned invalid JSON after repair; using heuristic extraction: {exc}", flush=True)
         return heuristic_parse_solver_output(solver_raw, task_type)
 
 
-def _compute_correctness(
-    *,
-    client: LLMClient,
-    cfg: Config,
-    question: str,
-    choices: list[str],
-    task_type: str,
-    gold_answer: str,
-    solver_answer: str,
-) -> tuple[bool, bool, str]:
+def _compute_correctness(*, client, cfg, question, choices, task_type, gold_answer, solver_answer):
     if task_type == "mcq":
         return _is_mcq_correct(gold_answer, solver_answer, choices), False, solver_answer
     if task_type == "numeric":
@@ -163,12 +145,19 @@ def _compute_correctness(
         return normalized == normalize_answer(gold_answer, task_type), False, normalized
 
     judge_prompt = build_judge_prompt(question, choices, gold_answer, solver_answer)
-    judge_raw = client.complete(judge_prompt, system=SYSTEM_JUDGE, model=cfg.models.judge_model)
+    if client is None:
+        judge_raw = run_local_inference(model, tokenizer, judge_prompt,
+                                        max_tokens=cfg.models.max_tokens,
+                                        temperature=cfg.models.temperature)
+    else:
+        judge_raw = client.complete(judge_prompt, system=SYSTEM_JUDGE, model=cfg.models.judge_model)
     try:
-        is_correct, normalized_model_answer = parse_judge_json(judge_raw)
+        is_correct, normalized_model_answer =safe_parse_judge_json(judge_raw)
     except ValueError as exc:
         raise RuntimeError(f"Judge produced invalid JSON: {exc}") from exc
     return is_correct, True, normalized_model_answer or solver_answer
+
+
 
 
 def _normalize_existing_rows(existing_rows: list[dict], task_type_by_qid: dict[str, str]) -> bool:
@@ -273,18 +262,23 @@ def _write_summary(
 
 
 def run(cfg: Config) -> dict:
-    api_key = resolve_api_key(cfg.api.api_key_env)
-    client = LLMClient(
-        api_key=api_key,
-        base_url=cfg.api.base_url,
-        api_version=cfg.api.api_version,
-        model=cfg.models.solver_model,
-        temperature=cfg.models.temperature,
-        max_tokens=cfg.models.max_tokens,
-        request_timeout_sec=cfg.api.request_timeout_sec,
-        max_retries=cfg.api.max_retries,
-    )
-
+    global model, tokenizer
+    # 判断是否使用本地模型
+    if "/" in cfg.models.solver_model:  # 如果是路径，就走本地 HuggingFace 模型
+        model, tokenizer = load_local_model(cfg.models.solver_model)
+        client = None  # 不用 API client
+    else:
+        api_key = resolve_api_key(cfg.api.api_key_env)
+        client = LLMClient(
+            api_key=api_key,
+            base_url=cfg.api.base_url,
+            api_version=cfg.api.api_version,
+            model=cfg.models.solver_model,
+            temperature=cfg.models.temperature,
+            max_tokens=cfg.models.max_tokens,
+            request_timeout_sec=cfg.api.request_timeout_sec,
+            max_retries=cfg.api.max_retries,
+        )
     data = load_jsonl(cfg.run.data_path)
     _enforce_dataset_protocol(cfg, len(data))
     random.Random(cfg.run.random_seed).shuffle(data)
@@ -357,12 +351,22 @@ def run(cfg: Config) -> dict:
                 penalty,
             )
             solver_system = build_solver_system(cfg.run.prompt_strategy, penalty)
-            solver_raw = client.complete(
-                solver_prompt,
-                system=solver_system,
-                model=cfg.models.solver_model,
-                image_url=ex.image,
-            )
+            if client is None:  # 本地模型
+                solver_raw = run_local_inference(
+                    model,
+                    tokenizer,
+                    solver_prompt,
+                    max_tokens=cfg.models.max_tokens,
+                    temperature=cfg.models.temperature
+                )
+            else:  # API 调用
+                solver_raw = client.complete(
+                    solver_prompt,
+                    system=solver_system,
+                    model=cfg.models.solver_model,
+                    image_url=ex.image,
+                )
+
 
             parsed = _parse_solver_output(
                 client=client,

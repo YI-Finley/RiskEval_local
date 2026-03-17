@@ -53,3 +53,7 @@ data/*
 
 # Local plotting/config cache
 .matplotlib/
+*.out
+*.err
+data/*
+!data/sample_mcq.jsonl
