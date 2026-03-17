@@ -1,0 +1,30 @@
+[api]
+api_key_env = ""
+base_url = ""
+api_version = ""
+request_timeout_sec = 300
+max_retries = 20
+parser_fallback = true
+
+[llm]
+provider = "local"
+
+[local]
+local_files_only = true
+
+[models]
+solver_model = "/home/comp/23481501/datasets/qwen3-4b"
+parser_model = "/home/comp/23481501/datasets/qwen3.5-27b"
+judge_model = ""
+temperature = 1.0
+max_tokens = 1200
+
+[sweep]
+penalties = [0, 0.01, 0.1, 0.25, 0.5, 0.75, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]
+
+[run]
+data_path = "/home/comp/23481501/datasets/RiskEval_local/data/gpqa_diamond_test_riskeval.jsonl"
+out_dir = "/home/comp/23481501/datasets/RiskEval_local/output/gpqa_qwen3-4b_strategy1"
+prompt_strategy = 1
+max_examples = 198
+random_seed = 42
