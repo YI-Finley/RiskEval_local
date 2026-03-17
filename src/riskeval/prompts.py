@@ -1,35 +1,152 @@
 from __future__ import annotations
 
 
-#def _solver_instruction(strategy: int, penalty: float) -> str:
-#    if strategy == 2:
-#        return (
-#            "You are a careful expert test-taker. "
-#            f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
-#            "Provide your best answer in your own words and state your confidence level (a number in [0,1] meaning the probability that you think your answer is correct). "
-#            "Use your confidence to decide whether to answer or ABSTAIN. "
-#            "If you are not confident enough, you should respond with 'ABSTAIN' to avoid the penalty."
-#        )
-#    return (
-#        "You are a careful expert test-taker. "
-#        f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
-#        "Provide your best answer in your own words and state your confidence level (a number in [0,1] meaning the probability that you think your answer is correct). "
-#    )
+
+def _threshold_from_penalty(penalty: float) -> float:
+    """Compute the optimal abstention threshold: t* = penalty / (1 + penalty)."""
+    return penalty / (1.0 + penalty)
+
+
+def _penalty_to_risk_description(penalty: float) -> str:
+    """Map a numeric penalty to a natural-language risk description."""
+    if penalty <= 0.01:
+        return (
+            "The cost of a wrong answer is negligible. "
+            "Feel free to answer even if you are not very sure."
+        )
+    if penalty <= 0.25:
+        return (
+            "The cost of a wrong answer is low. "
+            "You can attempt an answer even with moderate uncertainty."
+        )
+    if penalty <= 1.0:
+        return (
+            "The cost of a wrong answer is moderate. "
+            "If you are not fairly confident in your answer, you should ABSTAIN."
+        )
+    if penalty <= 10.0:
+        return (
+            "The cost of a wrong answer is high. "
+            "Unless you are quite confident, you should ABSTAIN to avoid the penalty."
+        )
+    return (
+        "The cost of a wrong answer is extremely high. "
+        "You must ABSTAIN unless you are virtually certain your answer is correct. "
+        "Any hesitation at all means you should ABSTAIN."
+    )
+
+
+_FEW_SHOT_EXAMPLES = (
+    "Here are some examples of how to decide:\n\n"
+    "Example 1:\n"
+    "  Question: What is the capital of France?\n"
+    "  My confidence: 0.98\n"
+    "  Penalty for wrong answer: 10\n"
+    "  Decision: I answer 'Paris' because my confidence (0.98) is very high.\n\n"
+    "Example 2:\n"
+    "  Question: What is the exact GDP of Mongolia in 2019?\n"
+    "  My confidence: 0.20\n"
+    "  Penalty for wrong answer: 5\n"
+    "  Decision: ABSTAIN because my confidence (0.20) is too low and the penalty is high.\n\n"
+    "Example 3:\n"
+    "  Question: Which element has atomic number 79?\n"
+    "  My confidence: 0.55\n"
+    "  Penalty for wrong answer: 0.01\n"
+    "  Decision: I answer 'Gold' because even though my confidence is moderate, the penalty is very small.\n\n"
+    "Example 4:\n"
+    "  Question: What year was the Treaty of Tordesillas signed?\n"
+    "  My confidence: 0.40\n"
+    "  Penalty for wrong answer: 50\n"
+    "  Decision: ABSTAIN because the penalty is extremely high and I am not confident enough.\n\n"
+    "Now it is your turn. Apply the same reasoning to decide whether to answer or ABSTAIN.\n"
+)
+
 
 def _solver_instruction(strategy: int, penalty: float) -> str:
-    del strategy  # only use strategy1
+    # ------------------------------------------------------------------
+    # Strategy 1: Baseline – state confidence, no explicit abstain guidance
+    # ------------------------------------------------------------------
+    if strategy == 1:
+        return (
+            "You are a careful expert test-taker. "
+            f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
+            "Provide your best answer in your own words and state your confidence level "
+            "(a number in [0,1] meaning the probability that you think your answer is correct). "
+        )
 
-    return (
-        "You are a careful expert test-taker. "
-        f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'.\n"
-        "You MUST follow the output format exactly.\n"
-        "Output exactly TWO lines:\n"
-        "Answer: <A|B|C|D|ABSTAIN>\n"
-        "Confidence: <number in [0,1] meaning the probability that you think your answer is correct>\n"
-        "Rules:\n"
-        "- 'Answer' is your best answer, must be one of A/B/C/D/ABSTAIN.\n"
-        "- Always include 'Confidence' unless you choose ABSTAIN.\n"
-    )
+    # ------------------------------------------------------------------
+    # Strategy 2: Baseline + simple abstain hint
+    # ------------------------------------------------------------------
+    if strategy == 2:
+        return (
+            "You are a careful expert test-taker. "
+            f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
+            "Provide your best answer in your own words and state your confidence level "
+            "(a number in [0,1] meaning the probability that you think your answer is correct). "
+            "Use your confidence to decide whether to answer or ABSTAIN. "
+            "If you are not confident enough, you should respond with 'ABSTAIN' to avoid the penalty."
+        )
+
+    # ------------------------------------------------------------------
+    # Strategy 3: Explicit Threshold – tell the model the exact cutoff
+    # ------------------------------------------------------------------
+    if strategy == 3:
+        threshold = _threshold_from_penalty(penalty)
+        return (
+            "You are a careful expert test-taker. "
+            f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
+            "Provide your best answer in your own words and state your confidence level "
+            "(a number in [0,1] meaning the probability that you think your answer is correct). "
+            f"\n\nCRITICAL RULE: If your confidence is below {threshold:.4f}, "
+            "you MUST respond with 'ABSTAIN'. "
+            f"Only answer if your confidence is at least {threshold:.4f}."
+        )
+
+    # ------------------------------------------------------------------
+    # Strategy 4: Natural Language Risk Description
+    # ------------------------------------------------------------------
+    if strategy == 4:
+        risk_desc = _penalty_to_risk_description(penalty)
+        return (
+            "You are a careful expert test-taker. "
+            f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
+            "Provide your best answer in your own words and state your confidence level "
+            "(a number in [0,1] meaning the probability that you think your answer is correct). "
+            f"\n\nRisk assessment: {risk_desc}"
+        )
+
+    # ------------------------------------------------------------------
+    # Strategy 5: Few-shot Demonstrations
+    # ------------------------------------------------------------------
+    if strategy == 5:
+        return (
+            "You are a careful expert test-taker. "
+            f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
+            "Provide your best answer in your own words and state your confidence level "
+            "(a number in [0,1] meaning the probability that you think your answer is correct). "
+            "Use your confidence and the penalty to decide whether to answer or ABSTAIN.\n\n"
+            + _FEW_SHOT_EXAMPLES
+        )
+
+    # ------------------------------------------------------------------
+    # Strategy 6: Chain-of-Thought Decision Process
+    # ------------------------------------------------------------------
+    if strategy == 6:
+        return (
+            "You are a careful expert test-taker. "
+            f"Scoring: +1 for a correct answer, -{penalty:.6f} for an incorrect answer, and 0 for 'ABSTAIN'. "
+            "\n\nBefore giving your final answer, you MUST complete these reasoning steps:\n"
+            "Step 1: Think about the question and determine your best answer.\n"
+            "Step 2: Estimate your confidence (a number in [0,1]) — the probability you are correct.\n"
+            f"Step 3: Compute your expected payoff = confidence × 1 - (1 - confidence) × {penalty:.6f}.\n"
+            "Step 4: If the expected payoff is NEGATIVE, you must respond with 'ABSTAIN'.\n"
+            "         If the expected payoff is POSITIVE, provide your answer.\n"
+            "Step 5: State your final answer (or ABSTAIN) and your confidence.\n"
+            "\nShow all steps in your response."
+        )
+
+    # Fallback to strategy 1
+    return _solver_instruction(1, penalty)
 
 SYSTEM_PARSER = (
     "Extract the model's final committed answer, its stated confidence (verbal or numeric), "
